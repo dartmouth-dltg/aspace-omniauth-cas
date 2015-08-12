@@ -6,14 +6,14 @@ class OacSessionController < SessionController
 
   skip_before_filter :unauthorised_access
 
+# Our first target for authentication, going through the OmniAuth/CAS
+# strategy in the "normal" fashion.  As a filter, this ensures that
+# the user can be authenticated before doing anything more with
+# ArchivesSpace.  The user is then redirected to our second target,
+# below, by way of the CAS login service, to generate a new ticket.
   def first
 
-    ####    self.logger.debug('*** DEBUG/first: entering OacSessionController')####
-    ####    self.logger.debug("self has methods:\n\t" + self.methods.sort.join("\n\t").to_s)####
-    username = auth_hash.extra.netid
-    ####    self.logger.debug("*** DEBUG/first:          params=#{params}")####
-    ####    self.logger.debug("*** DEBUG/first:       auth_hash=#{auth_hash}")####
-    ####    self.logger.debug("*** DEBUG/first:  username/NetID=#{username}")####
+    username                 = auth_hash.extra[AppConfig[:omniauthCas][:local_uid]]
     serviceUrl               = Addressable::URI.parse(params[:url])
     serviceUrl.path          = "auth/#{params[:provider]}/second"
     serviceUrl.query_values  = { :url      => params[:url],
@@ -21,56 +21,37 @@ class OacSessionController < SessionController
     redirectUrl              = Addressable::URI.parse(AppConfig[:omniauthCas][:url])
     redirectUrl.path         = AppConfig[:omniauthCas][:login_url]
     redirectUrl.query_values = { :service => serviceUrl.to_s }
-    ####    self.logger.debug("*** DEBUG/first: init/second/URL=#{redirectUrl.to_s}")####
 
-    ####    self.logger.debug('*** DEBUG/first: about to leave OacSessionController')####
     redirect_to redirectUrl.to_s
 
   end
 
+# Our second target, which takes the new CAS ticket of the
+# authenticated user (from the redirect in #first, above), and sends
+# it to the backend to validate this new, pristine ticket, thus
+# authenticating the user to the backend.  See
+# omniauthCas/backend/controller/users.rb for the
+# /user/<USERNAME>/omniauthCas endpoint.
   def second
 
-    ####    self.logger.debug('*** DEBUG/second: entering OacSessionController')####
-    ####    self.logger.debug("self has methods:\n\t" + self.methods.sort.join("\n\t").to_s)####
-
-    ####    self.logger.debug("*** DEBUG: auth has methods:\n\t" + auth.methods.sort.join("\n\t").to_s)####
-    ####    self.logger.debug("*** DEBUG:         params=#{params}")####
-
-    if ((backend_session = self.authn(params[:username], params[:url], params[:ticket])))
-      User.establish_session(self, backend_session, params[:username])
-    else
-      redirect_to '/' and return
-    end
-
-    self.logger.debug('*** DEBUG/second: leaving OacSessionController')####
-
-    ####    load_repository_list
-
-    ####    render :json => {:session => backend_session, :csrf_token => form_authenticity_token}
-
-    redirect_to :controller => :welcome, :action => :index
-
-  end
-
-  def authn(username, url, ticket)
-
-####    request.env.each_pair  { |k, v|####
-####      logger.info("request.env['#{k}']='#{v}'")####
-####    }####
-
-    uri      = JSONModel(:user).uri_for("#{username}/omniauthCas")
+    uri      = JSONModel(:user).uri_for("#{params[:username]}/omniauthCas")
     response = JSONModel::HTTP.post_form(uri,
                                          :url      => params[:url],
                                          :ticket   => params[:ticket],
                                          :provider => params[:provider])
 
-    self.logger.debug("*** DEBUG: response.code=#{response.code}/#{response.body}")
-    if (response.code == '200')
-      ASUtils.json_parse(response.body)
-    else
-      flash[:error] = I18n.t("authn for '#{username}' failed: " + response.code + '/' + response.body)
-      nil
+    ####self.logger.debug("omniauthCas/second: response.code=#{response.code}/#{response.body}")####
+    if (response.code != '200')
+      flash[:error] = I18n.t("Authentication for '#{params[:username]}' failed: " +
+                             response.code + '/' + response.body)
+      redirect_to '/' and return
     end
+
+    backend_session = ASUtils.json_parse(response.body)
+    User.establish_session(self, backend_session, params[:username])
+
+#   From frontend/controller/session.rb (#become_user).
+    redirect_to :controller => :welcome, :action => :index
 
   end
 

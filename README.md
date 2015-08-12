@@ -4,15 +4,16 @@ ArchivesSpace authentication with OmniAuth/CAS
 Getting started
 -------------
 
-- Download and unpack the latest release of the plugin into your ArchivesSpace plugins directory:
+Download and unpack the latest release of the plugin into your
+ArchivesSpace plugins directory:
 
 ```
 	$ curl ...
 	$ cd /path/to/archivesspace/plugins
-    $ unzip 
+    $ unzip ...
 ```
 
-- Initialize the `omniauthCas` plugin:
+Initialize the `omniauthCas` plugin:
 
 ```
      # For Linux/OSX
@@ -22,7 +23,9 @@ Getting started
      % scripts\initialize-plugin.bat omniauthCas
 ```
 
-- Configure the plugin by adding the following to your ArchivesSpace configuration file (`config/config.rb`), modified as appropriate to your situation:
+Configure the plugin by adding the following to your ArchivesSpace
+configuration file (`config/config.rb`), modified as appropriate to
+your situation:
 
 ```
 	AppConfig[:omniauthCas] = {
@@ -32,19 +35,65 @@ Getting started
 		:uid_key => 'user',
 		:host => '<CAS-SERVER-HOST>',
 		:ssl => true,
-####  :initialUser => { :username => '<USER_ID>',
-####                             :name     => '<USER-NAME', },
+        :local_uid => '<CAS_UID_FIELD>',
+        :local_email => '<CAS_EMAIL_FIELD>',
+#       :initialUser => { :username => '<USER_ID>',
+#                         :name     => '<USER-NAME', },
 	}
 ```
 
-- If you don't have any users in your ArchivesSpace install, you can bootstrap an initial user by uncommenting (and configuring) a local admin user.
+If you don't have any users in your ArchivesSpace install, you can
+bootstrap an initial user by uncommenting (and configuring) a local
+admin user.
 
-- Activate the `omniauthCas` plugin (uncommenting the `:plugins` line if necessary) by adding `omniauthCas` to the list of plugins:
+Activate the `omniauthCas` plugin (uncommenting the `:plugins` line if
+necessary) by adding `omniauthCas` to the list of plugins:
 
 ```
 	AppConfig[:plugins] = [ 'other_plugin', 'omniauthCas' ]
 ```
 
-- Start, or restart ArchivesSpace to pick up the configuration.
+Start, or restart ArchivesSpace to pick up the configuration.
+
+Technical Details
+---------------
+
+The following is based on my understanding of ArchivesSpace's
+architecture, and may not be completely correct:
+
+ArchivesSpace is composed of multiple servers (backend, frontend,
+public).  The frontend server mediates access to the backend server,
+but the backend server doesn't trust the frontend server to
+authenticate users (see the Authentication Manager code in the backend
+server).  This plugin allows users to authenticate to the frontend
+server and then the backend server, allowing the backend server to
+create a session for the user.
+
+Using the OmniAuth CAS strategy, the frontend server authenticates the
+user.  The "Sign In" link on the home page is overridden (see
+`frontend/views/shared/_header_user.html.erb`) to direct the user
+through the OmniAuth/CAS flow, which, if successful, results in the
+authenticated user passing through the `OacSessionController#first`
+method (in `frontend/controllers/oac_session_controller.rb`).  This
+method contructs a new CAS login URL with the service URL pointing at
+`OacSessionController#second` (also in
+`frontend/controllers/oac_session_controller.rb`).  This method
+accepts the redirect from the CAS server without processing the CAS
+ticket, so that the pristine ticket can be sent to the backend server
+(the `/users/<USERNAME>/omniauthCas` endpoint in
+`backend/controller/users.rb`).
+
+When the `/users/<USERNAME>/omniauthCas` endpoint (in
+`backend/controller/users.rb`) is invoked, it verifies that the user
+that authenticated to the frontend is a valid ArchivesSpace user
+before using the OmniAuth/CAS machinery to validate the pristine CAS
+ticket.  If successful, the user's information in ArchivesSpace (name,
+email) are updated from the CAS payload, and then a session is created
+for the user and returned to the frontend.
+
+A CAS proxy ticket might be better used than the ticket generation in
+the frontend `OacSessionController#second` method, above, but lacking
+specific support in OmniAuth/CAS for that part of the protocol, the
+above seemed most workable.
 
 ---

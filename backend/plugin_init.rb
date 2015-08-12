@@ -8,13 +8,13 @@ begin
   logger = ASpaceLogger.new($stderr);
   OmniAuth.config.logger = logger
 
-  logger.debug("DEBUG: AppConfig[:omniauthCas]='#{AppConfig[:omniauthCas]}'")####
+  logger.info("omniauthCas: AppConfig[:omniauthCas]='#{AppConfig[:omniauthCas]}'")####
 
-# Create our initial user, if we need to.
+# Create our initial user, if we need to bootstrap access to the
+# system: since we override the basic username/password authentication
+# mechanism, there isn't any way to log in as the admin user when this
+# is installed.
   if ((initUserInfo = AppConfig[:omniauthCas][:initialUser]))
-
-    ####    admin = JSONModel(:user).find(1)####
-    ####    logger.debug(admin.username + ': ' + ((admin.is_admin) ? '(admin)' : '') + " #{admin.permissions}")####
 
 #   Generate the set of permissions we want our initial user to have.
     permissions     = []
@@ -29,43 +29,28 @@ begin
       end
     end
 
-    logger.info("Permissions:")####
-    permissions.each do |permission|####
-      logger.info("\t#{permission.permission_code}: #{permission.description}")####
-    end####
-
 #   Create our initial user.
     if (!(initialUser = User.find(:username => initUserInfo[:username])))
       initialUser = JSONModel(:user).from_hash('username'   => initUserInfo[:username],
                                                'name'       => initUserInfo[:name],
                                                'is_admin'   => true)
     end
+    ####logger.info("omniauthCas: initialUser='#{initialUser}'")####
 
-    logger.debug("#{initialUser}")####
 #   Configure our initial user.
     begin
       initialUser.save(:password    => SecureRandom.hex,
                        :permissions => permissions)
     rescue ValidationException => error
-      logger.error("initialUser.save: #{error}")####
-      ####      logger.debug("error has methods:\n\t" + error.methods.sort.join("\n\t").to_s);####
-      ####      logger.debug("error.errors has methods:\n\t" + error.errors.methods.sort.join("\n\t").to_s);####
-      error.errors.each do |error|####
-        logger.debug("#{error}")####
-      end####
+      logger.error("omniauthCas/initialUser.save: #{error}")####
       initialUser.update(:permissions => permissions)
       initialUser.refetch    
     end
 
-    ####    logger.debug("initialUser has methods:\n\t" + initialUser.methods.sort.join("\n\t").to_s);####
-    ####    logger.debug("Permissions has methods:\n\t" + Permission.methods.sort.join("\n\t").to_s);####
-
-    logger.info("Created/updated initial user account for username '#{initialUser.username}' with permissions:")####
+    logger.info("omniauthCas: Created/updated initial user account for username '#{initialUser.username}' with permissions:")####
     initialUser.permissions.each do |permission|####
       logger.info("#{permission}")####
     end####
-####    logger.info("\tis_admin:    #{initialUser.is_admin}")####
-####    logger.info("\tpermissions: " + initialUser.permissions.sort.join(', '))####
 
   end
 
