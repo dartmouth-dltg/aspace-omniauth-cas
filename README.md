@@ -96,4 +96,8 @@ the frontend `OacSessionController#second` method, above, but lacking
 specific support in OmniAuth/CAS for that part of the protocol, the
 above seemed most workable.
 
+Eric J. Bivona (<Eric.J.Bivona@Dartmouth.EDU>)  
+Digital Library Technologies Group  
+Dartmouth College Library  
+
 ---
