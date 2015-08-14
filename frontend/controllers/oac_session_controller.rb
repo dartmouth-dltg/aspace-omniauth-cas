@@ -13,7 +13,15 @@ class OacSessionController < SessionController
 # below, by way of the CAS login service, to generate a new ticket.
   def first
 
-    username                 = auth_hash.extra[AppConfig[:omniauthCas][:local_uid]]
+#   :local_uid can be an ordered set of keys to work through the
+#   auth_hash to get to the value we use for "username".
+    username                 = auth_hash
+    uidKeyPath               = ((AppConfig[:omniauthCas][:auth_hash_uid].is_a?(Array)) \
+                                ? AppConfig[:omniauthCas][:auth_hash_uid]
+                                : [ AppConfig[:omniauthCas][:auth_hash_uid] ])
+    uidKeyPath.each do |key|
+      username               = username[key]
+    end
     serviceUrl               = Addressable::URI.parse(params[:url])
     serviceUrl.path          = "auth/#{params[:provider]}/second"
     serviceUrl.query_values  = { :url      => params[:url],

@@ -35,8 +35,10 @@ your situation:
 		:uid_key => 'user',
 		:host => '<CAS-SERVER-HOST>',
 		:ssl => true,
-        :local_uid => '<CAS_UID_FIELD>',
-        :local_email => '<CAS_EMAIL_FIELD>',
+		:auth_hash_uid => [ '<OA_CAS_AUTH_HASH_UID_KEY1>', '<OA_CAS_AUTH_HASH_UID_KEY1>', ],
+		:user_info_uid => '<OA_CAS_USER_INFO_UID_KEY>',
+		:user_info_email => '<OA_CAS_USER_INFO_UID_KEY>',
+		:email_convert_spaces => true,
 #       :initialUser => { :username => '<USER_ID>',
 #                         :name     => '<USER-NAME', },
 	}
@@ -45,6 +47,16 @@ your situation:
 If you don't have any users in your ArchivesSpace install, you can
 bootstrap an initial user by uncommenting (and configuring) a local
 admin user.
+
+The `:auth_hash_uid`, `:user_info_uid`, and `:user_info_email` values
+allow parameterized access of the OmniAuth/CAS data structures.  They
+can be single keys, or arrays of keys, if the OmniAuth/CAS payload has
+nested hashes.  The `:user_info_*` keys are used to access the
+`user_info` hash returned by
+`OmniAuth::Strategies::CAS::ServiceTicketValidator#user_info` method.
+
+The `:email_convert_spaces` flag indicates that whitespace in the
+value needs to be converted to periods to make a valid email address.
 
 Activate the `omniauthCas` plugin (uncommenting the `:plugins` line if
 necessary) by adding `omniauthCas` to the list of plugins:

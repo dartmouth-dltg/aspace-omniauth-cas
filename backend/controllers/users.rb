@@ -1,4 +1,5 @@
 # omniauthCas/backend/controllers/users.rb
+
 require 'aspace_logger'
 require 'omniauth-cas'
 
@@ -42,10 +43,28 @@ class ArchivesSpaceService < Sinatra::Base
                                   :username => params[:username],
                                   :ticket   => params[:ticket] }
       ####logger.debug("omniauthCas:    serviceUrl='#{serviceUrl.to_s}'")####
-      stv      = OmniAuth::Strategies::CAS::ServiceTicketValidator.new(cas, cas.options, serviceUrl.to_s, params[:ticket]).call
-      userInfo = stv.user_info
+      stv        = OmniAuth::Strategies::CAS::ServiceTicketValidator.new(cas, cas.options, serviceUrl.to_s, params[:ticket]).call
+      userInfo   = stv.user_info
       ####logger.debug("omniauthCas: stv.user_info='#{userInfo}'")####
-      userUid  = userInfo[AppConfig[:omniauthCas][:local_uid]]
+      userUid    = userInfo
+      uidKeyPath = ((AppConfig[:omniauthCas][:user_info_uid].is_a?(Array)) \
+                    ? AppConfig[:omniauthCas][:user_info_uid]
+                    : [ AppConfig[:omniauthCas][:user_info_uid] ])
+      uidKeyPath.each do |key|
+        userUid = userUid[key]
+      end
+      email     = userInfo
+      emailKeyPath = ((AppConfig[:omniauthCas][:user_info_email].is_a?(Array)) \
+                      ? AppConfig[:omniauthCas][:user_info_email]
+                      : [ AppConfig[:omniauthCas][:user_info_email] ])
+      emailKeyPath.each do |key|
+        email = email[key]
+      end
+#     If true, we convert whitespace to periods, then consolidate them.
+      if (AppConfig[:omniauthCas][:email_convert_spaces])
+        email.gsub!(/\s/, '.')
+        email.gsub!(/\.+/, '.')
+      end
       logger.debug("omniauthCas:       userUid='#{userUid}'")####
 #     If true, the authenticated user doesn't match the user the
 #     frontend authenticated.
@@ -55,7 +74,7 @@ class ArchivesSpaceService < Sinatra::Base
 
       json_user = JSONModel(:user).from_hash(:username => userUid,
                                              :name     => userInfo['name'],
-                                             :email    => userInfo[AppConfig[:omniauthCas][:local_email]])
+                                             :email    => email)
 
 #     From backend/app/model/authentication_manager.rb:
       begin
