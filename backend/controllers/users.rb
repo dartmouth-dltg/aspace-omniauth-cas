@@ -33,47 +33,30 @@ class ArchivesSpaceService < Sinatra::Base
     elsif (!(user = User.find(:username => params[:username])))
       raise NotFoundException.new("Unknown user '#{params[:username]}'")
     end
-    ####logger.debug("omniauthCas: user.username='#{user.username}'")####
+    ####logger.debug("omniauthCas/backend:   user.username='#{user.username}'")####
 
     begin
-      cas = OmniAuth::Strategies::CAS.new(nil, AppConfig[:omniauthCas])
+      cas = OmniAuth::Strategies::CAS.new(nil, AppConfig[:omniauthCas][:provider])
       serviceUrl              = Addressable::URI.parse(params[:url])
       serviceUrl.path         = 'auth/' + params[:provider] + '/second'
       serviceUrl.query_values = { :url      => params[:url],
                                   :username => params[:username],
                                   :ticket   => params[:ticket] }
-      ####logger.debug("omniauthCas:    serviceUrl='#{serviceUrl.to_s}'")####
-      stv        = OmniAuth::Strategies::CAS::ServiceTicketValidator.new(cas, cas.options, serviceUrl.to_s, params[:ticket]).call
-      userInfo   = stv.user_info
-      ####logger.debug("omniauthCas: stv.user_info='#{userInfo}'")####
-      userUid    = userInfo
-      uidKeyPath = ((AppConfig[:omniauthCas][:user_info_uid].is_a?(Array)) \
-                    ? AppConfig[:omniauthCas][:user_info_uid]
-                    : [ AppConfig[:omniauthCas][:user_info_uid] ])
-      uidKeyPath.each do |key|
-        userUid = userUid[key]
-      end
-      email     = userInfo
-      emailKeyPath = ((AppConfig[:omniauthCas][:user_info_email].is_a?(Array)) \
-                      ? AppConfig[:omniauthCas][:user_info_email]
-                      : [ AppConfig[:omniauthCas][:user_info_email] ])
-      emailKeyPath.each do |key|
-        email = email[key]
-      end
-#     If true, we convert whitespace to periods, then consolidate them.
-      if (AppConfig[:omniauthCas][:email_convert_spaces])
-        email.gsub!(/\s/, '.')
-        email.gsub!(/\.+/, '.')
-      end
-      logger.debug("omniauthCas:       userUid='#{userUid}'")####
+      ####logger.debug("omniauthCas/backend:    serviceUrl='#{serviceUrl.to_s}'")####
+      stv      = OmniAuth::Strategies::CAS::ServiceTicketValidator.new(cas, cas.options, serviceUrl.to_s, params[:ticket]).call
+      ####logger.debug("omniauthCas/backend: stv.user_info='#{stv.user_info}'")####
+#     Use the (backend) lambdas to pull the information we need from stv.user_info.
+      uid      = AppConfig[:omniauthCas][:backendUidProc].call(stv.user_info)
+      email    = AppConfig[:omniauthCas][:backendEmailProc].call(stv.user_info)
+      logger.debug("omniauthCas/backend:           uid='#{uid}'")####
 #     If true, the authenticated user doesn't match the user the
 #     frontend authenticated.
-      if (params[:username].casecmp(userUid) != 0)
-        raise ArgumentError.new("User mismatch: '#{params[:username]}' != '#{userUid}'")
+      if (params[:username].casecmp(uid) != 0)
+        raise ArgumentError.new("User mismatch: '#{params[:username]}' != '#{uid}'")
       end
 
-      json_user = JSONModel(:user).from_hash(:username => userUid,
-                                             :name     => userInfo['name'],
+      json_user = JSONModel(:user).from_hash(:username => uid,
+                                             :name     => stv.user_info['name'],
                                              :email    => email)
 
 #     From backend/app/model/authentication_manager.rb:
@@ -85,12 +68,12 @@ class ArchivesSpaceService < Sinatra::Base
 #	user logged in twice simultaneously.  As long as one of the
 #	updates succeeded it doesn't really matter.
         Log.warn("Got an optimistic locking error when updating user: #{fault}")
-        user = User.find(:username => userUid)
+        user = User.find(:username => uid)
       end
 
 #     From backend/app/lib/auth_helpers.rb:
       session               = Session.new
-      session[:user]        = userUid
+      session[:user]        = uid
       session[:login_time]  = Time.now
       session[:expirable]   = params[:expiring]
       session.save

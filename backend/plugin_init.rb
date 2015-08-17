@@ -8,7 +8,7 @@ begin
   logger = ASpaceLogger.new($stderr);
   OmniAuth.config.logger = logger
 
-  logger.info("omniauthCas: AppConfig[:omniauthCas]='#{AppConfig[:omniauthCas]}'")####
+  logger.info("omniauthCas/backend: AppConfig[:omniauthCas]='#{AppConfig[:omniauthCas]}'")####
 
 # Create our initial user, if we need to bootstrap access to the
 # system: since we override the basic username/password authentication
@@ -35,19 +35,19 @@ begin
                                                'name'       => initUserInfo[:name],
                                                'is_admin'   => true)
     end
-    ####logger.info("omniauthCas: initialUser='#{initialUser}'")####
+    ####logger.info("omniauthCas/backend: initialUser='#{initialUser}'")####
 
 #   Configure our initial user.
     begin
       initialUser.save(:password    => SecureRandom.hex,
                        :permissions => permissions)
     rescue ValidationException => error
-      logger.error("omniauthCas/initialUser.save: #{error}")####
+      logger.error("omniauthCas/backend: initialUser.save: #{error}")####
       initialUser.update(:permissions => permissions)
       initialUser.refetch    
     end
 
-    logger.info("omniauthCas: Created/updated initial user account for username '#{initialUser.username}' with permissions:")####
+    logger.info("omniauthCas/backend: Created/updated initial user account for username '#{initialUser.username}' with permissions:")####
     initialUser.permissions.each do |permission|####
       logger.info("#{permission}")####
     end####

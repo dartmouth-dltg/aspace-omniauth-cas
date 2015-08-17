@@ -13,7 +13,8 @@ ArchivesSpace plugins directory:
     $ unzip ...
 ```
 
-Initialize the `omniauthCas` plugin:
+Initialize the `omniauthCas` plugin (this will download the gems
+needed by the plugin):
 
 ```
      # For Linux/OSX
@@ -25,38 +26,36 @@ Initialize the `omniauthCas` plugin:
 
 Configure the plugin by adding the following to your ArchivesSpace
 configuration file (`config/config.rb`), modified as appropriate to
-your situation:
+your local situation:
 
 ```
 	AppConfig[:omniauthCas] = {
-		:url => 'https://<CAS-SERVER-HOST>',
-		:login_url => '/cas/login',
-		:service_validate_url => '/cas/serviceValidate',
-		:uid_key => 'user',
-		:host => '<CAS-SERVER-HOST>',
-		:ssl => true,
-		:auth_hash_uid => [ '<OA_CAS_AUTH_HASH_UID_KEY1>', '<OA_CAS_AUTH_HASH_UID_KEY1>', ],
-		:user_info_uid => '<OA_CAS_USER_INFO_UID_KEY>',
-		:user_info_email => '<OA_CAS_USER_INFO_UID_KEY>',
-		:email_convert_spaces => true,
+		:provider => {
+			:url                  => 'https://<CAS-SERVER-HOST>',
+			:login_url            => '/cas/login',
+			:service_validate_url => '/cas/serviceValidate',
+			:uid_key              => '<CAS-UID-KEY>',
+			:host                 => '<CAS-SERVER-HOST>',
+			:ssl                  => true,
+		},
+		:frontendUidProc  => lambda { |hash| ... },
+		:backendUidProc   => lambda { |hash| ... },
+		:backendEmailProc => lambda { |hash| ... },
 #       :initialUser => { :username => '<USER_ID>',
 #                         :name     => '<USER-NAME', },
 	}
 ```
 
+The `:frontendUidProc`, `:backendUidProc`, and `:backendEmailProc`
+lambdas provide hooks to pull needed information from the CAS
+payload.  `:frontendUidProc` is passed the OmniAuth/CAS `auth_hash` and
+is expected to return the ArchivesSpace username value for the user.
+`:backendUidProc` and `:backendEmailProc` are passed the hash returned
+by the `OmniAuth::Strategies::CAS::ServiceTicketValidator#user_info` method.
+
 If you don't have any users in your ArchivesSpace install, you can
 bootstrap an initial user by uncommenting (and configuring) a local
 admin user.
-
-The `:auth_hash_uid`, `:user_info_uid`, and `:user_info_email` values
-allow parameterized access of the OmniAuth/CAS data structures.  They
-can be single keys, or arrays of keys, if the OmniAuth/CAS payload has
-nested hashes.  The `:user_info_*` keys are used to access the
-`user_info` hash returned by
-`OmniAuth::Strategies::CAS::ServiceTicketValidator#user_info` method.
-
-The `:email_convert_spaces` flag indicates that whitespace in the
-value needs to be converted to periods to make a valid email address.
 
 Activate the `omniauthCas` plugin (uncommenting the `:plugins` line if
 necessary) by adding `omniauthCas` to the list of plugins:
@@ -66,6 +65,10 @@ necessary) by adding `omniauthCas` to the list of plugins:
 ```
 
 Start, or restart ArchivesSpace to pick up the configuration.
+
+To disable this plugin, remove it from the `AppConfig[:plugins]`
+array and restart ArchivesSpace.  This may be necessary to provide
+username/password access to the `admin` user.
 
 Technical Details
 ---------------
@@ -87,7 +90,7 @@ user.  The "Sign In" link on the home page is overridden (see
 through the OmniAuth/CAS flow, which, if successful, results in the
 authenticated user passing through the `OacSessionController#first`
 method (in `frontend/controllers/oac_session_controller.rb`).  This
-method contructs a new CAS login URL with the service URL pointing at
+method constructs a new CAS login URL with the service URL pointing at
 `OacSessionController#second` (also in
 `frontend/controllers/oac_session_controller.rb`).  This method
 accepts the redirect from the CAS server without processing the CAS

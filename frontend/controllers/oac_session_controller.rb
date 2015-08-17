@@ -13,21 +13,14 @@ class OacSessionController < SessionController
 # below, by way of the CAS login service, to generate a new ticket.
   def first
 
-#   :local_uid can be an ordered set of keys to work through the
-#   auth_hash to get to the value we use for "username".
-    username                 = auth_hash
-    uidKeyPath               = ((AppConfig[:omniauthCas][:auth_hash_uid].is_a?(Array)) \
-                                ? AppConfig[:omniauthCas][:auth_hash_uid]
-                                : [ AppConfig[:omniauthCas][:auth_hash_uid] ])
-    uidKeyPath.each do |key|
-      username               = username[key]
-    end
+#   Use the :frontend_uid lambda to dig out the username value.
+    username                 = AppConfig[:omniauthCas][:frontendUidProc].call(auth_hash)
     serviceUrl               = Addressable::URI.parse(params[:url])
     serviceUrl.path          = "auth/#{params[:provider]}/second"
     serviceUrl.query_values  = { :url      => params[:url],
                                  :username => username }                                    
-    redirectUrl              = Addressable::URI.parse(AppConfig[:omniauthCas][:url])
-    redirectUrl.path         = AppConfig[:omniauthCas][:login_url]
+    redirectUrl              = Addressable::URI.parse(AppConfig[:omniauthCas][:provider][:url])
+    redirectUrl.path         = AppConfig[:omniauthCas][:provider][:login_url]
     redirectUrl.query_values = { :service => serviceUrl.to_s }
 
     redirect_to redirectUrl.to_s
@@ -48,7 +41,7 @@ class OacSessionController < SessionController
                                          :ticket   => params[:ticket],
                                          :provider => params[:provider])
 
-    ####self.logger.debug("omniauthCas/second: response.code=#{response.code}/#{response.body}")####
+    ####self.logger.debug("omniauthCas/frontend/second: response.code=#{response.code}/#{response.body}")####
     if (response.code != '200')
       flash[:error] = I18n.t("Authentication for '#{params[:username]}' failed: " +
                              response.code + '/' + response.body)
