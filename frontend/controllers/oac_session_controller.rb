@@ -71,11 +71,11 @@ class OacSessionController < SessionController
     redirect_to logoutUrl.to_s
 
   end
-  
+
   protected
 
   def auth_hash
     request.env['omniauth.auth']
   end
-  
+
 end
