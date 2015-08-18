@@ -18,7 +18,7 @@ class OacSessionController < SessionController
     serviceUrl               = Addressable::URI.parse(params[:url])
     serviceUrl.path          = "auth/#{params[:provider]}/second"
     serviceUrl.query_values  = { :url      => params[:url],
-                                 :username => username }                                    
+                                 :username => username }
     redirectUrl              = Addressable::URI.parse(AppConfig[:omniauthCas][:provider][:url])
     redirectUrl.path         = AppConfig[:omniauthCas][:provider][:login_url]
     redirectUrl.query_values = { :service => serviceUrl.to_s }
@@ -56,6 +56,22 @@ class OacSessionController < SessionController
 
   end
 
+  def logout
+
+    reset_session
+
+    appUrl                 = Addressable::URI.parse(request.url)
+    appUrl.path            = ''
+    appUrl.query_values    = {}
+    logoutUrl              = Addressable::URI.parse(AppConfig[:omniauthCas][:provider][:url])
+    logoutUrl.path         = AppConfig[:omniauthCas][:logoutUrlPath]
+    logoutUrl.query_values = { :app => 'ArchivesSpace',
+                               :url => appUrl.to_s }
+
+    redirect_to logoutUrl.to_s
+
+  end
+  
   protected
 
   def auth_hash
