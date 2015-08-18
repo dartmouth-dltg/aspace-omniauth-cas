@@ -41,8 +41,11 @@ your local situation:
 		:frontendUidProc  => lambda { |hash| ... },
 		:backendUidProc   => lambda { |hash| ... },
 		:backendEmailProc => lambda { |hash| ... },
-#       :initialUser => { :username => '<USER_ID>',
-#                         :name     => '<USER-NAME', },
+		:logoutUrlPath    => '<CAS-LOGOUT-PATH>',
+#       :initialUser      => {
+#	        :username => '<USER_ID>',
+#           :name     => '<USER-NAME',
+#       },
 	}
 ```
 
@@ -52,6 +55,9 @@ payload.  `:frontendUidProc` is passed the OmniAuth/CAS `auth_hash` and
 is expected to return the ArchivesSpace username value for the user.
 `:backendUidProc` and `:backendEmailProc` are passed the hash returned
 by the `OmniAuth::Strategies::CAS::ServiceTicketValidator#user_info` method.
+
+The `:logoutUrlPath` value is used by the `Logout` link to clear the
+CAS service ticket and, potentially, the CAS ticket granting cookie.
 
 If you don't have any users in your ArchivesSpace install, you can
 bootstrap an initial user by uncommenting (and configuring) a local
