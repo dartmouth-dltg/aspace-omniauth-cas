@@ -43,8 +43,10 @@ class OacSessionController < SessionController
 
     ####self.logger.debug("omniauthCas/frontend/second: response.code=#{response.code}/#{response.body}")####
     if (response.code != '200')
-      flash[:error] = I18n.t("Authentication for '#{params[:username]}' failed: " +
-                             response.code + '/' + response.body)
+      flash[:error] = I18n.t("unknown_user") + ": " + params[:username]
+
+      Rails.logger.warn("Could not authenticate user '#{params[:username]}': #{response.code} / #{response.body}")
+
       redirect_to '/' and return
     end
 
