@@ -72,7 +72,7 @@
           <% if user_can?('become_user') %>
             <li><%= link_to I18n.t("navbar.become-user"), :controller => "session", :action => "select_user" %></li>
           <% end %>
-          <li><a href="#<%= AppConfig[:frontend_prefix] %>auth/cas/logout"><%= I18n.t("navbar.logout") %></a></li>
+          <li><a href="<%= AppConfig[:frontend_prefix] %>auth/cas/logout"><%= I18n.t("navbar.logout") %></a></li>
         </ul>
       </div>
     </div>

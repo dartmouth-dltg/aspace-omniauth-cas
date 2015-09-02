@@ -14,12 +14,12 @@ begin
 # system: since we override the basic username/password authentication
 # mechanism, there isn't any way to log in as the admin user when this
 # plugin is installed.
-  if ((initUserInfo = AppConfig[:omniauthCas][:initialUser])
-        && !(initialUser = User.find(:username => initUserInfo[:username])))
+  if ((initUserInfo = AppConfig[:omniauthCas][:initialUser]) &&
+        !(initialUser = User.find(:username => initUserInfo[:username])))
 #   Create our initial user.
-    initialUser = JSONModel(:user).from_hash('username'   => initUserInfo[:username],
-                                             'name'       => initUserInfo[:name],
-                                             'is_admin'   => true)
+    initialUser = JSONModel(:user).from_hash('username' => initUserInfo[:username],
+                                             'name'     => initUserInfo[:name],
+                                             'is_admin' => true)
     logger.info("omniauthCas/backend: initialUser='#{initialUser}'")####
   end
 
