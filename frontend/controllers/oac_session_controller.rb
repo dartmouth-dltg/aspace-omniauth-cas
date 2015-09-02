@@ -41,7 +41,7 @@ class OacSessionController < SessionController
                                          :ticket   => params[:ticket],
                                          :provider => params[:provider])
 
-    ####self.logger.debug("omniauthCas/frontend/second: response.code=#{response.code}/#{response.body}")####
+    ####Rails.logger.debug("omniauthCas/frontend/second: response.code=#{response.code}/#{response.body}")####
     if (response.code != '200')
       flash[:error] = I18n.t("Authentication for '#{params[:username]}' failed: " +
                              response.code + '/' + response.body)
