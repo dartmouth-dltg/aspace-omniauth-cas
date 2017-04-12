@@ -10,7 +10,7 @@ ArchivesSpace plugins directory:
 ```
 	$ curl ...
 	$ cd /path/to/archivesspace/plugins
-    $ unzip ...
+	$ unzip ...
 ```
 
 Initialize the `omniauthCas` plugin (this will download the gems
@@ -117,7 +117,7 @@ the frontend `OacSessionController#second` method, above, but lacking
 specific support in OmniAuth/CAS for that part of the protocol, the
 above seemed most workable.
 
-Eric J. Bivona (<Eric.J.Bivona@Dartmouth.EDU>)  
+Eric J. Bivona (<Eric.J.Bivona@dartmouth.edu>)  
 Digital Library Technologies Group  
 Dartmouth College Library  
 
