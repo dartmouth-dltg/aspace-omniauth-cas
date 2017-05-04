@@ -48,7 +48,8 @@ class ArchivesSpaceService < Sinatra::Base
 #     Use the (backend) lambdas to pull the information we need from stv.user_info.
       uid      = AppConfig[:omniauthCas][:backendUidProc].call(stv.user_info)
       email    = AppConfig[:omniauthCas][:backendEmailProc].call(stv.user_info)
-      logger.debug("omniauthCas/backend:           uid='#{uid}'")####
+      
+      ## logger.debug("omniauthCas/backend:           #{stv.user_info.inspect}")####
 #     If true, the authenticated user doesn't match the user the
 #     frontend authenticated.
       if (params[:username].casecmp(uid) != 0)
@@ -56,7 +57,7 @@ class ArchivesSpaceService < Sinatra::Base
       end
 
       json_user = JSONModel(:user).from_hash(:username => uid,
-                                             :name     => stv.user_info['name'],
+                                             :name     => stv.user_info['name'] || uid,
                                              :email    => email)
 
 #     From backend/app/model/authentication_manager.rb:

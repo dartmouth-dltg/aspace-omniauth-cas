@@ -3,6 +3,8 @@
 require 'aspace_logger'
 require 'omniauth-cas'
 
+include JSONModel
+
 begin
 
   logger = ASpaceLogger.new($stderr);
@@ -17,9 +19,10 @@ begin
   if ((initUserInfo = AppConfig[:omniauthCas][:initialUser]) &&
         !(initialUser = User.find(:username => initUserInfo[:username])))
 #   Create our initial user.
-    initialUser = JSONModel(:user).from_hash('username' => initUserInfo[:username],
+    
+    initialUser = User.create_from_json( JSONModel(:user).from_hash('username' => initUserInfo[:username],
                                              'name'     => initUserInfo[:name],
-                                             'is_admin' => true)
+                                             'is_admin' => true) )
     logger.info("omniauthCas/backend: initialUser='#{initialUser}'")####
   end
 
