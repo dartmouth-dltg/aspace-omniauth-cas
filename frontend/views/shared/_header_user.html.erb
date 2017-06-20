@@ -29,6 +29,11 @@
         <% if user_can?('administer_system') %>
           <li><%= link_to I18n.t("navbar.system_info"), :controller => :system_info, :action => :show %></li>
         <% end %>
+        <li><%= link_to I18n.t("navbar.manage_container_profiles"), :controller => :container_profiles, :action => :index %></li>
+        <% if user_can?('manage_location_profile_record') %>
+        <li><%= link_to I18n.t("navbar.manage_location_profiles"), :controller => :location_profiles, :action => :index %></li>
+        <% end %>
+
         <li class="divider"></li>
       <% end %>
 
@@ -72,7 +77,7 @@
           <% if user_can?('become_user') %>
             <li><%= link_to I18n.t("navbar.become-user"), :controller => "session", :action => "select_user" %></li>
           <% end %>
-          <li><a href="<%= AppConfig[:frontend_prefix] %>auth/cas/logout"><%= I18n.t("navbar.logout") %></a></li>
+          <li><%= link_to I18n.t("navbar.logout"), :controller => "session",:action => "logout"%></li>
         </ul>
       </div>
     </div>
