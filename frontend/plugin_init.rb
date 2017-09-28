@@ -10,5 +10,4 @@ Rails.application.config.middleware.use OmniAuth::Builder do
            AppConfig[:omniauthCas][:provider]
 end
 
-myRoutes = [ File.join(File.dirname(__FILE__), "routes.rb") ]
-ArchivesSpace::Application.config.paths['config/routes'].concat(myRoutes)
+ArchivesSpace::Application.extend_aspace_routes(File.join(File.dirname(__FILE__), "routes.rb"))
