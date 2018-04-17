@@ -90,6 +90,6 @@
   </li>
 <% else %>
   <li class="dropdown login-dropdown <% if params[:login] %>open<% end %>">
-    <a href="<%= AppConfig[:frontend_prefix] %>auth/cas"><%= I18n.t("navbar.login") %></a>
+    <a href="<%= AppConfig[:frontend_proxy_prefix] %>auth/cas"><%= I18n.t("navbar.login") %></a>
   </li>
 <% end %>
