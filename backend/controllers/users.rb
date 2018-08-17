@@ -2,10 +2,29 @@
 
 require 'aspace_logger'
 require 'omniauth-cas'
+require 'pp'
 
 class ArchivesSpaceService < Sinatra::Base
 
   include JSONModel
+
+
+  Endpoint.post('/users/email/:email')
+    .description("Return a user by email address")
+    .params(["email", String, "User email"])
+    .permissions([])
+    .returns([200, "User found"],
+             [404, "User not found"]) \
+  do
+    logger = ASpaceLogger.new($stderr)
+logger.debug("Find users by email: #{params[:email]}")
+    username = CasUser.fetch_username_from_email(params[:email])
+    if username.nil?
+      json_response({:error => 'User not found'}, 404)
+    else
+      json_response({:username => username})
+    end
+  end
 
   Endpoint.post('/users/:username/omniauthCas')
     .description("Authenticate via Omniauth/CAS")
@@ -21,7 +40,7 @@ class ArchivesSpaceService < Sinatra::Base
   do
 
     logger = ASpaceLogger.new($stderr)
-
+logger.debug("Got to endpoint with params: #{params.pretty_inspect}")
     user      = nil
     json_user = nil
     session   = nil
@@ -42,9 +61,9 @@ class ArchivesSpaceService < Sinatra::Base
       serviceUrl.query_values = { :url      => params[:url],
                                   :username => params[:username],
                                   :ticket   => params[:ticket] }
-      ####logger.debug("omniauthCas/backend:    serviceUrl='#{serviceUrl.to_s}'")####
+      logger.debug("omniauthCas/backend:    serviceUrl='#{serviceUrl.to_s}'")####
       stv      = OmniAuth::Strategies::CAS::ServiceTicketValidator.new(cas, cas.options, serviceUrl.to_s, params[:ticket]).call
-      ####logger.debug("omniauthCas/backend: stv.user_info='#{stv.user_info}'")####
+      logger.debug("omniauthCas/backend: stv.user_info='#{stv.user_info}'")####
 #     Use the (backend) lambdas to pull the information we need from stv.user_info.
       uid      = AppConfig[:omniauthCas][:backendUidProc].call(stv.user_info)
       email    = AppConfig[:omniauthCas][:backendEmailProc].call(stv.user_info)
@@ -93,5 +112,17 @@ class ArchivesSpaceService < Sinatra::Base
     end
 
   end
-
+ 
+# def fetch_username_from_email(email)
+#   username = nil
+#   begin
+#     users = User.where(email: email).all
+#     if users.length == 1
+#       username  = users[0].username
+#     end
+#   rescue Exception => bang
+#     logger.debug("BAD email: #{email} #{bang}")
+#   end
+#   return username
+# end
 end
