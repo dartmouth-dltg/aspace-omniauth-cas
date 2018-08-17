@@ -5,6 +5,9 @@ require 'omniauth-cas'
 
 OmniAuth.config.logger = ASpaceLogger.new($stderr)
 
+unless AppConfig[:omniauthCas][:full_host].blank?
+  OmniAuth.config.full_host = AppConfig[:omniauthCas][:full_host]
+end
 Rails.application.config.middleware.use OmniAuth::Builder do
   provider :cas,
            AppConfig[:omniauthCas][:provider]
