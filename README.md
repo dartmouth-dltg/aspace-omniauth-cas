@@ -1,6 +1,10 @@
 ArchivesSpace authentication with OmniAuth/CAS
 ==================================
 
+**NOTE** that this is the Harvard-specific fork, which uses the email address of the
+authenticated user to identify the user within ArchivesSpace
+
+
 Getting started
 -------------
 
@@ -38,10 +42,18 @@ your local situation:
 			:host                 => '<CAS-SERVER-HOST>',
 			:ssl                  => true,
 		},
-		:frontendUidProc  => lambda { |hash| ... },
-		:backendUidProc   => lambda { |hash| ... },
-		:backendEmailProc => lambda { |hash| ... },
-		:logoutUrlPath    => '<CAS-LOGOUT-PATH>',
+		:frontendUidProc  => lambda { |hash| uri =  JSONModel(:user).uri_for("email/#{hash['extra']['mail']}")
+                                       response = JSONModel::HTTP.post_form(uri)
+                                       if response.code == '200'
+                                         json = ASUtils.json_parse(response.body)
+                                         json["username"]
+                                       else
+                                         "nope"
+                                       end },
+  		:backendUidProc   => lambda { |hash| CasUser.fetch_username_from_email(hash['mail']) },
+  :backendEmailProc => lambda { |hash| hash['mail']  },
+
+		:logoutUrlPath    =>  '/cas/logout',
 #       :initialUser      => {
 #	        :username => '<USER_ID>',
 #           :name     => '<USER-NAME',
