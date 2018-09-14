@@ -92,4 +92,7 @@
   <li class="dropdown login-dropdown <% if params[:login] %>open<% end %>">
     <a href="<%= AppConfig[:frontend_proxy_prefix] %>auth/cas"><%= I18n.t("navbar.login") %></a>
   </li>
+  <% if AppConfig[:allow_user_registration] %>
+         <li><%= link_to (I18n.t("navbar.register_prefix") + " " +  I18n.t("navbar.register")), {:controller => "users", :action => "new"}, :class => "boring-link" %></li>
+  <% end %>
 <% end %>
