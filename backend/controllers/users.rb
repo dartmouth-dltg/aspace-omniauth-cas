@@ -2,7 +2,7 @@
 
 require 'aspace_logger'
 require 'omniauth-cas'
-require 'pp'
+#require 'pp'
 
 class ArchivesSpaceService < Sinatra::Base
 
@@ -17,7 +17,7 @@ class ArchivesSpaceService < Sinatra::Base
              [404, "User not found"]) \
   do
     logger = ASpaceLogger.new($stderr)
-logger.debug("Find users by email: #{params[:email]}")
+#logger.debug("Find users by email: #{params[:email]}")
     username = CasUser.fetch_username_from_email(params[:email])
     if username.nil?
       json_response({:error => 'User not found'}, 404)
@@ -40,7 +40,7 @@ logger.debug("Find users by email: #{params[:email]}")
   do
 
     logger = ASpaceLogger.new($stderr)
-logger.debug("Got to endpoint with params: #{params.pretty_inspect}")
+#logger.debug("Got to endpoint with params: #{params.pretty_inspect}")
     user      = nil
     json_user = nil
     session   = nil
@@ -61,9 +61,9 @@ logger.debug("Got to endpoint with params: #{params.pretty_inspect}")
       serviceUrl.query_values = { :url      => params[:url],
                                   :username => params[:username],
                                   :ticket   => params[:ticket] }
-      logger.debug("omniauthCas/backend:    serviceUrl='#{serviceUrl.to_s}'")####
+#      logger.debug("omniauthCas/backend:    serviceUrl='#{serviceUrl.to_s}'")####
       stv      = OmniAuth::Strategies::CAS::ServiceTicketValidator.new(cas, cas.options, serviceUrl.to_s, params[:ticket]).call
-      logger.debug("omniauthCas/backend: stv.user_info='#{stv.user_info}'")####
+#     logger.debug("omniauthCas/backend: stv.user_info='#{stv.user_info}'")####
 #     Use the (backend) lambdas to pull the information we need from stv.user_info.
       uid      = AppConfig[:omniauthCas][:backendUidProc].call(stv.user_info)
       email    = AppConfig[:omniauthCas][:backendEmailProc].call(stv.user_info)
