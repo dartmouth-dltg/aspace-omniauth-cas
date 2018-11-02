@@ -34,7 +34,6 @@ your local situation:
 			:url                  => 'https://<CAS-SERVER-HOST>',
 			:login_url            => '/cas/login',
 			:service_validate_url => '/cas/serviceValidate',
-			:uid_key              => '<CAS-UID-KEY>',
 			:host                 => '<CAS-SERVER-HOST>',
 			:ssl                  => true,
 		},
