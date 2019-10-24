@@ -74,7 +74,7 @@
         <a class="btn btn-default navbar-btn dropdown-toggle last" data-toggle="dropdown" href="#"><span class="caret"></span></a>
         <ul class="dropdown-menu pull-right">
 
-          <li><%= link_to I18n.t("navbar.user_global_preferences"), :controller => :preferences, :action => :edit, :id => 0, :global => true %></li>
+          <li><%= link_to I18n.t("navbar.global_preferences"), :controller => :preferences, :action => :edit, :id => 0, :global => true %></li>
           <% if session[:repo_id] %>
             <li><%= link_to I18n.t("navbar.user_repo_preferences"), :controller => :preferences, :action => :edit, :id => 0 %></li>
           <% end %>
