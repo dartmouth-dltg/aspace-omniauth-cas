@@ -1,0 +1,7 @@
+@charset "utf-8";
+
+.omniauth-cas-login {
+    width: 100%;
+    color: #fff;
+    font-size: 1.5em;
+}
