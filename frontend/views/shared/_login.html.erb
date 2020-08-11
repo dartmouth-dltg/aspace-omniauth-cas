@@ -1,1 +1,3 @@
-<!-- remove login form since this provides a potential way to circumvent the SSO login -->
+<%= form_tag({:controller => "oac_session",:action => "first"}, :method => "post", :class => "login") do %>
+  <button class="btn-primary navbar-btn btn-default"><%= I18n.t("omniauth_cas_login") %></button>
+<% end %>

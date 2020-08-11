@@ -1,2 +1,3 @@
 en:
+  omniauth_cas_login: Login with CAS
   unknown_user: Authentication failed for user
