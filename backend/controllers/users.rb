@@ -2,29 +2,10 @@
 
 require 'aspace_logger'
 require 'omniauth-cas'
-#require 'pp'
 
 class ArchivesSpaceService < Sinatra::Base
 
   include JSONModel
-
-
-  Endpoint.post('/users/email/:email')
-    .description("Return a user by email address")
-    .params(["email", String, "User email"])
-    .permissions([])
-    .returns([200, "User found"],
-             [404, "User not found"]) \
-  do
-    logger = ASpaceLogger.new($stderr)
-#logger.debug("Find users by email: #{params[:email]}")
-    username = CasUser.fetch_username_from_email(params[:email])
-    if username.nil?
-      json_response({:error => 'User not found'}, 404)
-    else
-      json_response({:username => username})
-    end
-  end
 
   Endpoint.post('/users/:username/omniauthCas')
     .description("Authenticate via Omniauth/CAS")
@@ -39,20 +20,17 @@ class ArchivesSpaceService < Sinatra::Base
              [403, "Login failed"]) \
   do
 
-    logger = ASpaceLogger.new($stderr)
-#logger.debug("Got to endpoint with params: #{params.pretty_inspect}")
     user      = nil
     json_user = nil
     session   = nil
 
-#   We can only support CAS authentication.
+    # We can only support CAS authentication.
     if ('cas'.casecmp(params[:provider]) != 0)
       raise ArgumentError.new("Provider mismatch: '#{params[:provider]}' != 'cas'")
-#   We only allow users we know about to log in (essentially authorization).
+    # We only allow users we know about to log in (essentially authorization).
     elsif (!(user = User.find(:username => params[:username])))
       raise NotFoundException.new("Unknown user '#{params[:username]}'")
     end
-    ####logger.debug("omniauthCas/backend:   user.username='#{user.username}'")####
 
     begin
       cas = OmniAuth::Strategies::CAS.new(nil, AppConfig[:omniauthCas][:provider])
@@ -61,16 +39,14 @@ class ArchivesSpaceService < Sinatra::Base
       serviceUrl.query_values = { :url      => params[:url],
                                   :username => params[:username],
                                   :ticket   => params[:ticket] }
-#      logger.debug("omniauthCas/backend:    serviceUrl='#{serviceUrl.to_s}'")####
       stv      = OmniAuth::Strategies::CAS::ServiceTicketValidator.new(cas, cas.options, serviceUrl.to_s, params[:ticket]).call
-#     logger.debug("omniauthCas/backend: stv.user_info='#{stv.user_info}'")####
-#     Use the (backend) lambdas to pull the information we need from stv.user_info.
+
+      # Use the (backend) lambdas to pull the information we need from stv.user_info.
       uid      = AppConfig[:omniauthCas][:backendUidProc].call(stv.user_info)
       email    = AppConfig[:omniauthCas][:backendEmailProc].call(stv.user_info)
       
-      ## logger.debug("omniauthCas/backend:           #{stv.user_info.inspect}")####
-#     If true, the authenticated user doesn't match the user the
-#     frontend authenticated.
+      # If true, the authenticated user doesn't match the user the
+      # frontend authenticated.
       if (params[:username].casecmp(uid) != 0)
         raise ArgumentError.new("User mismatch: '#{params[:username]}' != '#{uid}'")
       end
@@ -79,19 +55,19 @@ class ArchivesSpaceService < Sinatra::Base
                                              :name     => stv.user_info['name'] || uid,
                                              :email    => email)
 
-#     From backend/app/model/authentication_manager.rb:
+      # From backend/app/model/authentication_manager.rb:
       begin
         user.update_from_json(json_user,
                               :lock_version => user.lock_version)
       rescue Sequel::NoExistingObject => fault
-#	We'll swallow these because they only really mean that the
-#	user logged in twice simultaneously.  As long as one of the
-#	updates succeeded it doesn't really matter.
+      #	We'll swallow these because they only really mean that the
+      #	user logged in twice simultaneously.  As long as one of the
+      #	updates succeeded it doesn't really matter.
         Log.warn("Got an optimistic locking error when updating user: #{fault}")
         user = User.find(:username => uid)
       end
 
-#     From backend/app/lib/auth_helpers.rb:
+      # From backend/app/lib/auth_helpers.rb:
       session               = Session.new
       session[:user]        = uid
       session[:login_time]  = Time.now
@@ -112,17 +88,5 @@ class ArchivesSpaceService < Sinatra::Base
     end
 
   end
- 
-# def fetch_username_from_email(email)
-#   username = nil
-#   begin
-#     users = User.where(email: email).all
-#     if users.length == 1
-#       username  = users[0].username
-#     end
-#   rescue Exception => bang
-#     logger.debug("BAD email: #{email} #{bang}")
-#   end
-#   return username
-# end
+
 end

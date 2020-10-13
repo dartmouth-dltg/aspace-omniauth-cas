@@ -1,10 +1,6 @@
 ArchivesSpace authentication with OmniAuth/CAS
 ==================================
 
-**NOTE** that this is the Harvard-specific fork, which uses the email address of the
-authenticated user to identify the user within ArchivesSpace
-
-
 Getting started
 -------------
 
@@ -14,7 +10,7 @@ ArchivesSpace plugins directory:
 ```
 	$ curl ...
 	$ cd /path/to/archivesspace/plugins
-	$ unzip ...
+    $ unzip ...
 ```
 
 Initialize the `omniauthCas` plugin (this will download the gems
@@ -38,21 +34,14 @@ your local situation:
 			:url                  => 'https://<CAS-SERVER-HOST>',
 			:login_url            => '/cas/login',
 			:service_validate_url => '/cas/serviceValidate',
+			:uid_key              => '<CAS-UID-KEY>',
 			:host                 => '<CAS-SERVER-HOST>',
 			:ssl                  => true,
 		},
-		:frontendUidProc  => lambda { |hash| uri =  JSONModel(:user).uri_for("email/#{hash['extra']['mail']}")
-                                       response = JSONModel::HTTP.post_form(uri)
-                                       if response.code == '200'
-                                         json = ASUtils.json_parse(response.body)
-                                         json["username"]
-                                       else
-                                         "nope"
-                                       end },
-  		:backendUidProc   => lambda { |hash| CasUser.fetch_username_from_email(hash['mail']) },
-  :backendEmailProc => lambda { |hash| hash['mail']  },
-
-		:logoutUrlPath    =>  '/cas/logout',
+		:frontendUidProc  => lambda { |hash| ... },
+		:backendUidProc   => lambda { |hash| ... },
+		:backendEmailProc => lambda { |hash| ... },
+		:logoutUrlPath    => '<CAS-LOGOUT-PATH>',
 #       :initialUser      => {
 #	        :username => '<USER_ID>',
 #           :name     => '<USER-NAME',
@@ -128,7 +117,7 @@ the frontend `OacSessionController#second` method, above, but lacking
 specific support in OmniAuth/CAS for that part of the protocol, the
 above seemed most workable.
 
-Eric J. Bivona (<Eric.J.Bivona@dartmouth.edu>)  
+Eric J. Bivona (<Eric.J.Bivona@Dartmouth.EDU>)  
 Digital Library Technologies Group  
 Dartmouth College Library  
 
