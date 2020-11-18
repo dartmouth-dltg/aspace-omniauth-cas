@@ -18,10 +18,10 @@ needed by the plugin):
 
 ```
      # For Linux/OSX
-     $ scripts/initialize-plugin.sh omniauthCas
+     $ scripts/initialize-plugin.sh aspace-omniauth-cas
      
      # For Windows
-     % scripts\initialize-plugin.bat omniauthCas
+     % scripts\initialize-plugin.bat aspace-omniauth-cas
 ```
 
 Configure the plugin by adding the following to your ArchivesSpace
