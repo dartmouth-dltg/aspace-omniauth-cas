@@ -1,3 +1,1 @@
-<%= form_tag({:controller => "oac_session",:action => "first"}, :method => "post", :class => "login") do %>
-  <button class="btn-primary navbar-btn btn-default"><%= I18n.t("omniauth_cas_login") %></button>
-<% end %>
+<a class="btn btn-primary btn-default omniauth-cas-login" href="<%= AppConfig[:frontend_proxy_prefix] %>auth/cas"><%= I18n.t("omniauth_cas_login") %></a>

@@ -4,7 +4,7 @@ require 'omniauth-cas'
 
 class OacSessionController < SessionController
 
-  skip_before_filter :unauthorised_access
+  skip_before_action :unauthorised_access
 
 # Our first target for authentication, going through the OmniAuth/CAS
 # strategy in the "normal" fashion.  As a filter, this ensures that
