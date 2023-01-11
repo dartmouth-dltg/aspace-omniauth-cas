@@ -1,3 +1,4 @@
 en:
   omniauth_cas_login: Login with CAS
+  omniauth_cas_or_login: Or, login with username and password
   unknown_user: Authentication failed for user

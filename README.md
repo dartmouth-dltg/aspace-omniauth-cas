@@ -42,10 +42,12 @@ your local situation:
 		:backendUidProc   => lambda { |hash| ... },
 		:backendEmailProc => lambda { |hash| ... },
 		:logoutUrlPath    => '<CAS-LOGOUT-PATH>',
+#		:full_host	=> lambda {|_| '<ARCHIVESSPACE_URL>' }
 #       :initialUser      => {
 #	        :username => '<USER_ID>',
 #           :name     => '<USER-NAME',
 #       },
+#		:allow_standard_login => true/false
 	}
 ```
 
@@ -63,11 +65,19 @@ If you don't have any users in your ArchivesSpace install, you can
 bootstrap an initial user by uncommenting (and configuring) a local
 admin user.
 
+If you want to allow standard form based username and password logins as well 
+as CAS authentication, uncomment and set `:allow_standard_login` to `true`.
+
+You may need to set `:full_host` if you are running behind a reverse proxy or
+in other instances where the ssl state cannot be correctly determined. See
+https://github.com/omniauth/omniauth/blob/master/lib/omniauth/strategy.rb
+
+
 Activate the `omniauthCas` plugin (uncommenting the `:plugins` line if
-necessary) by adding `omniauthCas` to the list of plugins:
+necessary) by adding `aspace-omniauth-cas` to the list of plugins:
 
 ```
-	AppConfig[:plugins] = [ 'other_plugin', 'omniauthCas' ]
+	AppConfig[:plugins] = [ 'other_plugin', 'aspace-omniauth-cas' ]
 ```
 
 Start, or restart ArchivesSpace to pick up the configuration.
@@ -92,7 +102,7 @@ create a session for the user.
 
 Using the OmniAuth CAS strategy, the frontend server authenticates the
 user.  The "Sign In" link on the home page is overridden (see
-`frontend/views/shared/_header_user.html.erb`) to direct the user
+`frontend/views/shared/_login.html.erb`) to direct the user
 through the OmniAuth/CAS flow, which, if successful, results in the
 authenticated user passing through the `OacSessionController#first`
 method (in `frontend/controllers/oac_session_controller.rb`).  This

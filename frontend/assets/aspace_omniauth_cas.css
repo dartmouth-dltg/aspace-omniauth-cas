@@ -5,3 +5,7 @@
     color: #fff;
     font-size: 1.5em;
 }
+
+.omniauth-cas-login-alternate {
+    margin-top: 2rem;
+}
