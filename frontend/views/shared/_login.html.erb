@@ -1,1 +1,15 @@
 <a class="btn btn-primary btn-default omniauth-cas-login" href="<%= AppConfig[:frontend_proxy_prefix] %>auth/cas"><%= I18n.t("omniauth_cas_login") %></a>
+<% if AppConfig.has_key?(:omniauthCas) && AppConfig[:omniauthCas][:allow_standard_login] %>
+    <p class="omniauth-cas-login-alternate"><%= I18n.t "omniauth_cas_or_login" %></p>
+    <%= form_tag({:controller => "session",:action => "login"}, :method => "post", :class => "login") do %>
+        <p class="alert alert-danger"><%= I18n.t "login.login_fail" %></p>
+        <p class="alert alert-success"><%= I18n.t "login.login_success" %>.</p>
+        <div class="form-group">
+        <input id="user_username" type="text" name="username" size="30" placeholder="<%= I18n.t "login.username_placeholder" %>" class="form-control" aria-label="<%= I18n.t "login.username_aria_label" %>"/>
+        </div>
+        <div class="form-group">
+        <input id="user_password" type="password" name="password" size="30" placeholder="<%= I18n.t "login.password_placeholder" %>" class="form-control" aria-label="<%= I18n.t "login.password_aria_label" %>"/>
+        </div>
+    <input class="btn btn-primary navbar-btn btn-default" type="submit" name="commit" value="<%= I18n.t("login.login") %>" id="login" />
+    <% end %>
+<% end %>

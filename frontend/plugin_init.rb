@@ -21,7 +21,11 @@ Rails.application.config.after_initialize do
   class SessionController < ApplicationController
   
     def login
-      backend_session = nil
+      if AppConfig.has_key?(:omniauthCas) && AppConfig[:omniauthCas][:allow_standard_login]
+        backend_session = User.login(params[:username], params[:password])
+      else
+        backend_session = nil
+      end
   
       if backend_session
         User.establish_session(self, backend_session, params[:username])
