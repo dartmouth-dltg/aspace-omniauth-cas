@@ -7,12 +7,9 @@ Getting started
 Download and unpack the latest release of the plugin into your
 ArchivesSpace plugins directory:
 
-Add the Local Gems plugin (https://github.com/dartmouth-dltg/local_gems) to your
-ArchivesSpace plugin folder. The OmniAuth/Cas plugin depends on the Local Gems
-plugin to correctly initialize.
+Add the ArchivesSpace Gem Pin gem (https://github.com/dartmouth-dltg/local_gems) to your ArchivesSpace plugin folder. The OmniAuth/Cas plugin depends on this gem to correctly initialize. Without it, the plugin could install gems that conflict with core.
 
-Initialize the `omniauthCas` plugin (this will download the gems
-needed by the plugin):
+Initialize the aspace-omniauth-cas plugin (this will download the gems needed by the plugin):
 
 ```
      # For Linux/OSX
