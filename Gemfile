@@ -2,7 +2,7 @@ ASpaceGems.setup if defined? ASpaceGems
 
 source 'http://rubygems.org'
 
-gem 'dltg_fixer', path: "#{File.expand_path('..',File.expand_path(File.dirname(__FILE__)))}/local_gems/dltg_fixer"
+gem 'as_gem_pin', path: "#{File.expand_path('..',File.expand_path(File.dirname(__FILE__)))}"
 gem 'omniauth', '>= 1.6', :require => false
 gem 'hashie', '~>4', :require => false
 gem 'omniauth-cas', '>= 1.1', :require => false
