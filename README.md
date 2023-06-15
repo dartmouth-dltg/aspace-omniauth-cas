@@ -18,9 +18,9 @@ needed by the plugin):
      # For Linux/OSX
      $ scripts/initialize-plugin.sh aspace-omniauth-cas
 
-		 # For M* Macs
-		 This gist provides a way to initialize the plugin correctly
-		 https://gist.github.com/jdshaw/c9ecb660ba68cd84abe5d44b001c37d1
+     # For M* Macs
+     This gist provides a way to initialize the plugin correctly
+     https://gist.github.com/jdshaw/c9ecb660ba68cd84abe5d44b001c37d1
      
      # For Windows
      % scripts\initialize-plugin.bat aspace-omniauth-cas
