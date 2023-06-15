@@ -9,7 +9,7 @@ ArchivesSpace plugins directory.
 
 Add the ArchivesSpace Gem Pin gem (https://github.com/dartmouth-dltg/local_gems) to your
 ArchivesSpace plugin folder. The OmniAuth/Cas plugin depends on this gem
-plugin to correctly initialize. Without it, the plugin could install gems that conflict with core.
+to correctly initialize. Without it, the plugin could install gems that conflict with core.
 
 Initialize the `aspace-omniauth-cas` plugin (this will download the gems
 needed by the plugin):
