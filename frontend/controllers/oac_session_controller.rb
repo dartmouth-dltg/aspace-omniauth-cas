@@ -35,7 +35,7 @@ class OacSessionController < SessionController
 # /user/<USERNAME>/omniauthCas endpoint.
   def second
 
-    uri      = JSONModel(:user).uri_for("#{params[:username]}/omniauthCas")
+    uri      = JSONModel(:user).uri_for("#{params[:username]}/omniauth/omniauthCas")
     response = JSONModel::HTTP.post_form(uri,
                                          :url      => params[:url],
                                          :ticket   => params[:ticket],

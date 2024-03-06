@@ -7,7 +7,7 @@ class ArchivesSpaceService < Sinatra::Base
 
   include JSONModel
 
-  Endpoint.post('/users/:username/omniauthCas')
+  Endpoint.post('/users/:username/omniauth/omniauthCas')
     .description("Authenticate via Omniauth/CAS")
     .params(["username", Username, "Your username"],
             ["url", String, "The url"],
