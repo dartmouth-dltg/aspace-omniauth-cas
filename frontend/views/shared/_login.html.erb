@@ -1,4 +1,4 @@
-<a class="btn btn-primary btn-default omniauth-cas-login" href="<%= AppConfig[:frontend_proxy_prefix] %>auth/cas"><%= I18n.t("omniauth_cas_login") %></a>
+<a class="btn btn-primary omniauth-cas-login" href="<%= AppConfig[:frontend_proxy_prefix] %>auth/cas"><%= I18n.t("omniauth_cas_login") %></a>
 <% if AppConfig.has_key?(:omniauthCas) && AppConfig[:omniauthCas][:allow_standard_login] %>
     <p class="omniauth-cas-login-alternate"><%= I18n.t "omniauth_cas_or_login" %></p>
     <%= form_tag({:controller => "session",:action => "login"}, :method => "post", :class => "login") do %>

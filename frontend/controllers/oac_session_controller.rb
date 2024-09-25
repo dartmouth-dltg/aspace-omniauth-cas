@@ -22,7 +22,7 @@ class OacSessionController < SessionController
     redirectUrl              = Addressable::URI.parse(AppConfig[:omniauthCas][:provider][:url])
     redirectUrl.path         = AppConfig[:omniauthCas][:provider][:login_url]
     redirectUrl.query_values = { :service => serviceUrl.to_s }
-
+puts "redirect url: #{redirectUrl}"
     redirect_to redirectUrl.to_s
 
   end
