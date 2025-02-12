@@ -1,11 +1,9 @@
 ASpaceGems.setup if defined? ASpaceGems
 
-source 'http://rubygems.org'
+source 'https://rubygems.org'
 
-gem 'omniauth', '>= 1.6', :require => false
-gem 'hashie', '~>4', :require => false
-gem 'omniauth-cas', '<= 2', :require => false
-gem 'addressable', '= 2.8.7', :require => true
-gem 'public_suffix', '4.0.7', :require => true
-gem 'jdbc-mysql', '>= 8.0'
-gem 'warbler', '= 2.0.5'
+gem 'omniauth', '>= 1.6'
+gem 'hashie', '~>4'
+gem 'omniauth-cas', '<= 2'
+gem 'addressable', '= 2.8.7'
+gem 'public_suffix', '4.0.7'
